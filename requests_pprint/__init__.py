@@ -8,7 +8,7 @@ except ImportError:
     pass
 
 
-def pretty_print_http_request(req: requests.models.PreparedRequest) -> None:
+def pprint_http_request(req: requests.models.PreparedRequest) -> None:
     """
     At this point it is completely built and ready
     to be fired; it is "prepared".
@@ -53,7 +53,7 @@ def pretty_print_http_request(req: requests.models.PreparedRequest) -> None:
     print(msg)
 
 
-def pretty_print_http_response(resp: requests.models.Response) -> None:
+def pprint_http_response(resp: requests.models.Response) -> None:
     """
     At this point it is completely built and ready
     to be fired; it is "prepared".
@@ -96,14 +96,14 @@ def print_response_summary(response: requests.models.Response) -> None:
     if response.history:
         print("[bold yellow]Request was redirected![/]")
         print("------ ORIGINAL REQUEST ------")
-        pretty_print_http_request(response.history[0].request)
+        pprint_http_request(response.history[0].request)
         print("------ ORIGINAL RESPONSE ------")
-        pretty_print_http_response(response.history[0])
+        pprint_http_response(response.history[0])
         print("------ REDIRECTED REQUEST ------")
-        pretty_print_http_request(response.request)
+        pprint_http_request(response.request)
         print("------ REDIRECTED RESPONSE ------")
-        pretty_print_http_response(response)
+        pprint_http_response(response)
     else:
-        print("Request was not redirected")
-        pretty_print_http_request(response.request)
-        pretty_print_http_response(response)
+        print("[bold green]Request was not redirected[/]")
+        pprint_http_request(response.request)
+        pprint_http_response(response)
