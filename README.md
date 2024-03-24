@@ -133,6 +133,7 @@ pprint_http_request(prepared_request)
 ```
 
 Output:
+
 ![1](https://i.imgur.com/VG7rfZq.png)
 
 ### 2. Pretty Print HTTP Response
@@ -149,6 +150,7 @@ pprint_http_response(response)
 ```
 
 Output:
+
 ![2](https://i.imgur.com/uDF8sBk.png)
 
 ### 3. Print Response Summary
@@ -165,7 +167,8 @@ print_response_summary(response)
 ```
 
 Output:
-![3](https://i.imgur.com/BkzCvkB.png)
+
+![3](https://i.imgur.com/eCPqCT1.png)
 
 ## Contributors
 

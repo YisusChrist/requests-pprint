@@ -40,13 +40,13 @@ def pprint_http_request(req: requests.models.PreparedRequest) -> None:
     if isinstance(req.body, bytes):
         body: str = req.body.decode()
     else:
-        body = str(req.body)
+        body = req.body or ""
 
     msg: str = "{}\n{}\r\n{}\r\n\r\n{}\n{}".format(
         "--------------START--------------",
         f"{req.method} {path} {http_version}",
         "\r\n".join(f"[b]{k}[/]: {v}" for k, v in req.headers.items()),
-        body or "",
+        body,
         "---------------END---------------",
     )
 
