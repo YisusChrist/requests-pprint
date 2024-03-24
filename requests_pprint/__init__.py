@@ -1,3 +1,5 @@
+"""Init file for the requests_pprint package."""
+
 import json
 
 import requests  # pip install requests
