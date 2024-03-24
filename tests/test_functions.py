@@ -1,11 +1,11 @@
-from _pytest.capture import CaptureResult
 import pytest
+from _pytest.capture import CaptureResult
 from requests.models import PreparedRequest, Response
 from requests.structures import CaseInsensitiveDict
 
 from requests_pprint import (
-    pretty_print_http_request,
-    pretty_print_http_response,
+    pprint_http_request,
+    pprint_http_response,
     print_response_summary,
 )
 
@@ -33,7 +33,7 @@ def sample_response() -> Response:
 def test_pretty_print_http_request(
     sample_request: PreparedRequest, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    pretty_print_http_request(sample_request)
+    pprint_http_request(sample_request)
     captured: CaptureResult[str] = capsys.readouterr()
 
     assert "--------------START--------------" in captured.out
@@ -47,7 +47,7 @@ def test_pretty_print_http_request(
 def test_pretty_print_http_response(
     sample_response: Response, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    pretty_print_http_response(sample_response)
+    pprint_http_response(sample_response)
     captured: CaptureResult[str] = capsys.readouterr()
 
     assert "--------------START--------------" in captured.out
@@ -62,6 +62,7 @@ def test_print_response_summary_no_redirect(
 ) -> None:
     print_response_summary(sample_response)
     captured: CaptureResult[str] = capsys.readouterr()
+
     assert "Request was not redirected" in captured.out
 
 
@@ -72,6 +73,7 @@ def test_print_response_summary_with_redirect(
     sample_response.history = [sample_response]
     print_response_summary(sample_response)
     captured: CaptureResult[str] = capsys.readouterr()
+
     assert "Request was redirected!" in captured.out
     assert "------ ORIGINAL REQUEST ------" in captured.out
     assert "------ ORIGINAL RESPONSE ------" in captured.out
