@@ -37,7 +37,7 @@
 
 <br>
 
-`requests-pprint` is a Python script that allows you to print your HTTP requests and responses in a pretty format. It is based on the `requests` library and uses the `rich` library to print the response in a more readable way.
+`requests-pprint` is a Python library that allows you to print your HTTP requests and responses in a pretty format. It is based on the `requests` library and uses the `rich` library to print the response in a more readable way.
 
 <details>
 <summary>Table of Contents</summary>
@@ -51,6 +51,8 @@
   - [1. Pretty Print HTTP Request](#1-pretty-print-http-request)
   - [2. Pretty Print HTTP Response](#2-pretty-print-http-response)
   - [3. Print Response Summary](#3-print-response-summary)
+  - [4. Pretty Print Asynchronous HTTP Response](#4-pretty-print-asynchronous-http-response)
+  - [5. Pretty Print Asynchronous Response Summary](#5-pretty-print-asynchronous-response-summary)
 - [Contributors](#contributors)
   - [How do I contribute to requests-pprint?](#how-do-i-contribute-to-requests-pprint)
 - [License](#license)
@@ -61,9 +63,10 @@
 
 Here's a breakdown of the packages needed and their versions:
 
-- [poetry](https://pypi.org/project/poetry) - 1.7.1 (_only for manual installation_)
-- [requests](https://pypi.org/project/requests) - 2.31.0
-- [rich](https://pypi.org/project/rich) - 13.7.1
+- [poetry](https://pypi.org/project/poetry) >= 1.7.1 (_only for manual installation_)
+- [aiohttp](https://pypi.org/project/aiohttp) >= 3.9.5
+- [requests](https://pypi.org/project/requests) >= 2.31.0
+- [rich](https://pypi.org/project/rich) >= 13.7.1
 
 > [!NOTE]\
 > The software has been developed and tested using Python `3.12.1`. The minimum required version to run the software is Python 3.6. Although the software may work with previous versions, it is not guaranteed.
@@ -170,6 +173,60 @@ Output:
 
 ![3](https://i.imgur.com/eCPqCT1.png)
 
+---
+
+Since 2024-07-28, `requests-pprint` supports asynchronous requests from the [aiohttp](https://pypi.org/project/aiohttp) library. You can use the `pprint_async_http_request` and `pprint_async_http_response` functions to print the formatted HTTP request and response, respectively, as well as the `print_async_response_summary` function to print a summary of the HTTP response.
+
+Here is an example of how to use these functions:
+
+### 4. Pretty Print Asynchronous HTTP Response
+
+```python
+import asyncio
+import aiohttp
+
+from requests_pprint import print_async_response_summary
+
+async def main():
+    async with aiohttp.ClientSession() as session:
+        url = "https://api.example.com"
+        headers = {"User-Agent": "Mozilla/5.0"}
+        body = {"key": "value"}
+        async with session.post(url, headers=headers, json=body) as response:
+            await pprint_async_http_response(response)
+
+
+asyncio.run(main())
+```
+
+Output:
+
+![4](https://i.imgur.com/uDF8sBk.png)
+
+### 5. Pretty Print Asynchronous Response Summary
+
+```python
+import asyncio
+import aiohttp
+
+from requests_pprint import print_async_response_summary
+
+async def main():
+    async with aiohttp.ClientSession() as session:
+        url = "https://api.example.com"
+        headers = {"User-Agent": "Mozilla/5.0"}
+        body = {"key": "value"}
+        async with session.post(url, headers=headers, json=body) as response:
+            await print_async_response_summary(response)
+
+
+asyncio.run(main())
+```
+
+Output:
+
+![5](https://i.imgur.com/eCPqCT1.png)
+
 ## Contributors
 
 <a href="https://github.com/YisusChrist/requests-pprint/graphs/contributors"><img src="https://contrib.rocks/image?repo=YisusChrist/requests-pprint" /></a>
@@ -187,3 +244,7 @@ See [Contributing](.github/CONTRIBUTING.md) for more details.
 ## License
 
 `requests-pprint` is released under the [GPL-3.0 License](https://opensource.org/license/gpl-3-0).
+
+```
+
+```
