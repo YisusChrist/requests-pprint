@@ -244,7 +244,3 @@ See [Contributing](.github/CONTRIBUTING.md) for more details.
 ## License
 
 `requests-pprint` is released under the [GPL-3.0 License](https://opensource.org/license/gpl-3-0).
-
-```
-
-```
