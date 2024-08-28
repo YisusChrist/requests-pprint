@@ -4,7 +4,7 @@ from requests.models import PreparedRequest, Response
 from aiohttp import ClientRequest, ClientResponse, RequestInfo
 
 try:
-    from rich import print  # pylint: disable=redefined-builtin  # pip install rich
+    from rich import print  # pylint: disable=redefined-builtin
 except ImportError:
     pass
 
