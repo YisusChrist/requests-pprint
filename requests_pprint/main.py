@@ -16,9 +16,6 @@ async def pprint_async_http_request(req: ClientRequest | RequestInfo) -> None:
     Args:
         req (aiohttp.ClientRequest): The request to print.
     """
-    if not req:
-        return
-
     if "Host" not in req.headers and req.url:
         req.headers["Host"] = req.url.host  # type: ignore
 
@@ -52,9 +49,6 @@ async def pprint_async_http_response(resp: ClientResponse) -> None:
     Args:
         resp (aiohttp.ClientResponse): The response to print.
     """
-    if not resp:
-        return
-
     http_version: str = "HTTP/1.1"
     response_body: str = await resp.text()
 
@@ -81,9 +75,6 @@ async def print_async_response_summary(response: ClientResponse) -> None:
     Args:
         response (aiohttp.ClientResponse): The response to print.
     """
-    if not response:
-        return
-
     if response.history:
         print("[bold yellow]Request was redirected![/]")
         print("------ ORIGINAL REQUEST ------")
@@ -114,9 +105,6 @@ def pprint_http_request(req: PreparedRequest) -> None:
     Args:
         req (requests.models.PreparedRequest): The request to print.
     """
-    if not req:
-        return
-
     if "Host" not in req.headers and req.url:
         req.headers["Host"] = req.url.split("/")[2]
 
@@ -157,11 +145,8 @@ def pprint_http_response(resp: Response) -> None:
     Args:
         resp (requests.models.Response): The response to print.
     """
-    if not resp:
-        return
-
     if not resp.raw:
-        http_version = "HTTP/1.1"
+        http_version: str = "HTTP/1.1"
     else:
         http_version = f"HTTP/{resp.raw.version // 10}.{resp.raw.version % 10}"
 
@@ -188,9 +173,6 @@ def print_response_summary(response: Response) -> None:
     Args:
         response (requests.models.Response): The response to print.
     """
-    if not response:
-        return
-
     if response.history:
         print("[bold yellow]Request was redirected![/]")
         print("------ ORIGINAL REQUEST ------")
