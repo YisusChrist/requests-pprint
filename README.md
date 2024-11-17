@@ -185,7 +185,7 @@ Here is an example of how to use these functions:
 import asyncio
 import aiohttp
 
-from requests_pprint import print_async_response_summary
+from requests_pprint import pprint_async_http_response
 
 async def main():
     async with aiohttp.ClientSession() as session:
