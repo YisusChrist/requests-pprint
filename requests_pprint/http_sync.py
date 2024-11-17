@@ -1,7 +1,11 @@
 from requests.models import PreparedRequest, Response
 
-from requests_pprint.formatting import (format_headers, format_http_message,
-                                        parse_body, parse_response_body)
+from requests_pprint.formatting import (
+    format_headers,
+    format_http_message,
+    parse_body,
+    parse_response_body,
+)
 
 try:
     from rich import print  # pylint: disable=redefined-builtin
@@ -54,11 +58,11 @@ def pprint_http_response(resp: Response) -> None:
     Args:
         resp (requests.models.Response): The response to print.
     """
-    if not resp.raw:
-        http_version: str = "HTTP/1.1"
-    else:
-        http_version = f"HTTP/{resp.raw.version // 10}.{resp.raw.version % 10}"
-
+    http_version: str = (
+        f"HTTP/{resp.raw.version // 10}.{resp.raw.version % 10}"
+        if resp.raw
+        else "HTTP/1.1"
+    )
     response_body: str = parse_response_body(resp)
 
     msg: str = format_http_message(
