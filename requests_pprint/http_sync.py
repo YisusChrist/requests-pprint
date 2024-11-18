@@ -63,13 +63,13 @@ def pprint_http_response(resp: Response) -> None:
         if resp.raw
         else "HTTP/1.1"
     )
-    response_body: str = parse_response_body(resp)
+    response_body: str | bytes = parse_response_body(resp)
 
     msg: str = format_http_message(
         "--------------START--------------",
         f"{http_version} {resp.status_code} {resp.reason}",
         format_headers(resp.headers),
-        response_body,
+        response_body,  # type: ignore
         "---------------END---------------",
     )
 

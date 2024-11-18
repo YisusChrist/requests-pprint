@@ -41,13 +41,13 @@ async def pprint_async_http_response(resp: ClientResponse) -> None:
     Args:
         resp (aiohttp.ClientResponse): The response to print.
     """
-    response_body: str = await async_parse_response_body(resp)
+    response_body: str | bytes = await async_parse_response_body(resp)
 
     msg: str = format_http_message(
         "--------------START--------------",
         f"HTTP/1.1 {resp.status} {resp.reason}",
         format_headers(resp.headers),
-        response_body,
+        response_body,  # type: ignore
         "---------------END---------------",
     )
 
