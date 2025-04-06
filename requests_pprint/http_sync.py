@@ -1,11 +1,8 @@
 from requests.models import PreparedRequest, Response
 
-from requests_pprint.formatting import (
-    format_headers,
-    format_http_message,
-    parse_body,
-    parse_response_body,
-)
+from requests_pprint.formatting import (format_headers, format_http_message,
+                                        parse_request_body,
+                                        parse_response_body)
 
 try:
     from rich import print  # pylint: disable=redefined-builtin
@@ -13,7 +10,7 @@ except ImportError:
     pass
 
 
-def pprint_http_request(req: PreparedRequest) -> None:
+def pprint_http_request(req: PreparedRequest | None) -> None:
     """
     At this point it is completely built and ready
     to be fired; it is "prepared".
@@ -27,19 +24,22 @@ def pprint_http_request(req: PreparedRequest) -> None:
     Args:
         req (requests.models.PreparedRequest): The request to print.
     """
+    if req is None:
+        return
+    
     if "Host" not in req.headers and req.url:
         req.headers["Host"] = req.url.split("/")[2]
 
     path: str = (
         req.url.split(req.headers["Host"])[-1] if req.url else req.path_url or "/"
     )
-    body: str = parse_body(req.body)
+    request_body: str = parse_request_body(req)
 
     msg: str = format_http_message(
         "--------------START--------------",
         f"{req.method} {path} HTTP/1.1",
         format_headers(req.headers),
-        body,
+        request_body,
         "---------------END---------------",
     )
 

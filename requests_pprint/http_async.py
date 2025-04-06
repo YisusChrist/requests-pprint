@@ -1,8 +1,8 @@
 from aiohttp import ClientRequest, ClientResponse, RequestInfo
 
-from requests_pprint.formatting import (async_parse_response_body,
-                                        format_headers, format_http_message,
-                                        parse_body)
+from requests_pprint.formatting import (async_parse_request_body,
+                                        async_parse_response_body,
+                                        format_headers, format_http_message)
 
 try:
     from rich import print  # pylint: disable=redefined-builtin
@@ -21,7 +21,9 @@ async def pprint_async_http_request(req: ClientRequest | RequestInfo) -> None:
         req.headers["Host"] = req.url.host  # type: ignore
 
     path: str = req.url.path_qs or "/"
-    body: str = "" if isinstance(req, RequestInfo) else parse_body(req.body)
+    body: str = (
+        "" if isinstance(req, RequestInfo) else await async_parse_request_body(req)
+    )
 
     msg: str = format_http_message(
         "--------------START--------------",

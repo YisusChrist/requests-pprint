@@ -1,14 +1,32 @@
 import json
-from xml.dom.minidom import parseString
+from typing import Any
+from xml.dom.minidom import Document, parseString
 
-from aiohttp import ClientResponse, ContentTypeError
+from aiohttp import ClientRequest, ClientResponse, ContentTypeError
 from multidict import CIMultiDict, CIMultiDictProxy
-from requests import Response
+from requests import PreparedRequest, Response
 from requests.structures import CaseInsensitiveDict
 
 
+def is_binary_content(content_type: str) -> bool:
+    """Returns True if the content type indicates binary data."""
+    binary_types: list[str] = [
+        "application/pdf",
+        "application/octet-stream",
+        "image/",
+        "video/",
+        "audio/",
+    ]
+    return any(content_type.startswith(bt) for bt in binary_types)
+
+
 def format_headers(
-    headers: dict | CaseInsensitiveDict | CIMultiDict | CIMultiDictProxy,
+    headers: (
+        dict[str, Any]
+        | CaseInsensitiveDict[str]
+        | CIMultiDict[str]
+        | CIMultiDictProxy[str]
+    ),
 ) -> str:
     """
     Format headers for pretty printing.
@@ -42,26 +60,11 @@ def format_http_message(
     )
 
 
-def parse_body(body: bytes | str | None) -> str:
-    """
-    Parse the body of an HTTP message.
-
-    Args:
-        body (bytes | str | None): The body of the HTTP message.
-
-    Returns:
-        str: The parsed body as a string.
-    """
-    if isinstance(body, bytes):
-        return body.decode()
-    return body or ""
-
-
 def parse_content(
     content_type: str,
     content: bytes,
     content_text: str,
-    content_json: dict,
+    content_json: dict[str, Any],
     content_encoding: str = "utf-8",
 ) -> str | bytes:
     """
@@ -71,14 +74,17 @@ def parse_content(
         content_type (str): The content type of the response.
         content (bytes): The raw content of the response.
         content_text (str): The text content of the response.
-        content_json (dict): The JSON content of the response.
+        content_json (dict[str, Any]): The JSON content of the response.
         content_encoding (str): The encoding of the content.
 
     Returns:
         str | bytes: The parsed content.
     """
+    # Binary or image content
+    if is_binary_content(content_type):
+        return "[BINARY DATA]"
     # Check for BOM and decode with UTF-8-SIG if present
-    if content.startswith(b"\xef\xbb\xbf"):
+    elif content.startswith(b"\xef\xbb\xbf"):
         return content.decode("utf-8-sig")
     # JSON handling
     elif "application/json" in content_type:
@@ -89,15 +95,11 @@ def parse_content(
     # XML handling
     elif "application/xml" in content_type or "text/xml" in content_type:
         try:
-            dom = parseString(content)
+            dom: Document = parseString(content)
             return dom.toprettyxml()
         except Exception:
             return content.decode("utf-8", errors="replace")
-    # Binary or image content
-    elif "application/octet-stream" in content_type or content_type.startswith(
-        "image/"
-    ):
-        return content
+
     # Encoding detection if no BOM is present
     if content_encoding:
         try:
@@ -109,7 +111,26 @@ def parse_content(
     return content_text or content.decode("utf-8", errors="replace")
 
 
-async def async_parse_body(body: bytes | None) -> str:
+def parse_request_body(request: PreparedRequest) -> str:
+    """
+    Parse the body of an HTTP message.
+
+    Args:
+        body (bytes | str | None): The body of the HTTP message.
+
+    Returns:
+        str: The parsed body as a string.
+    """
+    body: bytes | str | None = request.body
+    if is_binary_content(request.headers.get("Content-Type", "")):
+        return "[BINARY DATA]"
+
+    if isinstance(body, bytes):
+        return body.decode()
+    return str(body) or ""
+
+
+async def async_parse_request_body(request: ClientRequest) -> str:
     """
     Parse the body of an async HTTP message.
 
@@ -119,9 +140,13 @@ async def async_parse_body(body: bytes | None) -> str:
     Returns:
         str: The parsed body as a string.
     """
-    if body is None:
-        return ""
-    return body.decode()
+    body: bytes | str | None = request.body
+    if is_binary_content(request.headers.get("Content-Type", "")):
+        return "[BINARY DATA]"
+
+    if isinstance(body, bytes):
+        return body.decode()
+    return str(body) or ""
 
 
 def parse_response_body(response: Response) -> str | bytes:
@@ -142,7 +167,7 @@ def parse_response_body(response: Response) -> str | bytes:
     except UnicodeDecodeError:
         content_text = ""
     try:
-        content_json: dict = response.json()
+        content_json: dict[str, Any] = response.json()
     except json.JSONDecodeError:
         content_json = {}
 
@@ -162,14 +187,14 @@ async def async_parse_response_body(response: ClientResponse) -> str | bytes:
         str | bytes: The parsed body of the response.
     """
     content_type: str = response.headers.get("Content-Type", "").lower()
-    content_encoding: str = response.get_encoding()
     content: bytes = await response.read()
+    content_encoding: str = response.get_encoding()
     try:
         content_text: str = await response.text()
     except UnicodeDecodeError:
         content_text = ""
     try:
-        content_json: dict = await response.json()
+        content_json: dict[str, Any] = await response.json()
     except (json.JSONDecodeError, ContentTypeError):
         content_json = {}
 
