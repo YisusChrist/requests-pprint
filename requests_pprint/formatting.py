@@ -111,36 +111,17 @@ def parse_content(
     return content_text or content.decode("utf-8", errors="replace")
 
 
-def parse_request_body(request: PreparedRequest) -> str:
+def parse_request_body(request: PreparedRequest | ClientRequest) -> str:
     """
     Parse the body of an HTTP message.
 
     Args:
-        body (bytes | str | None): The body of the HTTP message.
+        request (PreparedRequest | ClientRequest): The request to parse.
 
     Returns:
         str: The parsed body as a string.
     """
-    body: bytes | str | None = request.body
-    if is_binary_content(request.headers.get("Content-Type", "")):
-        return "[BINARY DATA]"
-
-    if isinstance(body, bytes):
-        return body.decode()
-    return str(body) or ""
-
-
-async def async_parse_request_body(request: ClientRequest) -> str:
-    """
-    Parse the body of an async HTTP message.
-
-    Args:
-        body (bytes | None): The body of the HTTP message.
-
-    Returns:
-        str: The parsed body as a string.
-    """
-    body: bytes | str | None = request.body
+    body = request.body
     if is_binary_content(request.headers.get("Content-Type", "")):
         return "[BINARY DATA]"
 
@@ -193,7 +174,7 @@ async def async_parse_response_body(response: ClientResponse) -> str | bytes:
     content_type: str = response.headers.get("Content-Type", "").lower()
     if is_binary_content(content_type):
         return "[BINARY DATA]"
-    
+
     try:
         content: bytes = await response.read()
     except ClientConnectionError:
