@@ -52,8 +52,7 @@ async def aitohttp_client() -> ClientSession:
 
 @pytest_asyncio.fixture
 async def async_sample_response(aitohttp_client: ClientSession) -> ClientResponse:
-    async with aitohttp_client.get("https://example.com") as response:
-        return response
+    return await aitohttp_client.get("https://httpbin.org/get")
 
 
 def test_pretty_print_http_request(
@@ -109,7 +108,7 @@ def test_print_response_summary_redirect(
 
 
 @pytest.mark.asyncio
-async def test_pretty_print_async_http_request(
+async def test_pprint_async_http_request(
     async_sample_request: ClientRequest, capsys: pytest.CaptureFixture[str]
 ) -> None:
     await pprint_async_http_request(async_sample_request)
@@ -123,7 +122,7 @@ async def test_pretty_print_async_http_request(
 
 
 @pytest.mark.asyncio
-async def test_pretty_print_async_http_response(
+async def test_pprint_async_http_response(
     async_sample_response: ClientResponse, capsys: pytest.CaptureFixture[str]
 ) -> None:
     await pprint_async_http_response(async_sample_response)
@@ -132,7 +131,7 @@ async def test_pretty_print_async_http_response(
     assert "--------------START--------------" in captured.out
     assert "HTTP/1.1 200 OK" in captured.out
     assert "Content-Type: application/json" in captured.out
-    assert '"status": "success"' in captured.out
+    assert '"url": "https://httpbin.org/get"' in captured.out
     assert "---------------END---------------" in captured.out
 
 
@@ -148,11 +147,13 @@ async def test_print_async_response_summary_no_redirect(
 
 @pytest.mark.asyncio
 async def test_print_async_response_summary_redirect(
-    async_sample_response: ClientResponse, capsys: pytest.CaptureFixture[str]
+    aitohttp_client: ClientSession, capsys: pytest.CaptureFixture[str]
 ) -> None:
     # Simulate a redirected response
-    #async_sample_response.history
-    await print_async_response_summary(async_sample_response)
+    response: ClientResponse = await aitohttp_client.get(
+        "https://httpbin.org/redirect/1"
+    )
+    await print_async_response_summary(response)
     captured: CaptureResult[str] = capsys.readouterr()
 
     assert "Request was redirected!" in captured.out
