@@ -5,7 +5,7 @@ description = "Pretty print your python HTTP requests"
 license = "GPL-3.0-only"
 authors = [{ name = "YisusChrist", email = "agelrenorenardo@gmail.com" }]
 readme = "README.md"
-requires-python = ">=3.8,<4.0"
+requires-python = ">=3.9"
 dependencies = [
     "requests (>=2.31.0,<3.0.0)",
     "rich>=13.7.1",
