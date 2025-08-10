@@ -9,7 +9,7 @@ from requests_pprint.formatting import (format_headers, format_http_message,
 try:
     from rich import print  # pylint: disable=redefined-builtin
 except ImportError:
-    pass
+    from builtins import print
 
 
 def pprint_http_request(req: PreparedRequest | None) -> None:
@@ -29,18 +29,19 @@ def pprint_http_request(req: PreparedRequest | None) -> None:
     if req is None:
         return
     
-    if "Host" not in req.headers and req.url:
-        req.headers["Host"] = req.url.split("/")[2]
+    headers = req.headers.copy()
+    if "Host" not in headers and req.url:
+        headers["Host"] = req.url.split("/")[2]
 
     path: str = (
-        req.url.split(req.headers["Host"])[-1] if req.url else req.path_url or "/"
+        req.url.split(headers["Host"])[-1] if req.url else req.path_url or "/"
     )
     request_body: str = parse_request_body(req)
 
     msg: str = format_http_message(
         "--------------START--------------",
         f"{req.method} {path} HTTP/1.1",
-        format_headers(req.headers),
+        format_headers(headers),
         request_body,
         "---------------END---------------",
     )

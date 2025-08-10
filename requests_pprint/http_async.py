@@ -9,7 +9,7 @@ from requests_pprint.formatting import (async_parse_response_body,
 try:
     from rich import print  # pylint: disable=redefined-builtin
 except ImportError:
-    pass
+    from builtins import print
 
 
 async def pprint_async_http_request(req: ClientRequest | RequestInfo) -> None:
@@ -19,8 +19,9 @@ async def pprint_async_http_request(req: ClientRequest | RequestInfo) -> None:
     Args:
         req (aiohttp.ClientRequest): The request to print.
     """
-    if "Host" not in req.headers and req.url:
-        req.headers["Host"] = req.url.host  # type: ignore
+    headers = req.headers.copy()
+    if "Host" not in headers and req.url:
+        headers["Host"] = req.url.host  # type: ignore
 
     path: str = req.url.path_qs or "/"
     body: str = "" if isinstance(req, RequestInfo) else parse_request_body(req)
@@ -28,7 +29,7 @@ async def pprint_async_http_request(req: ClientRequest | RequestInfo) -> None:
     msg: str = format_http_message(
         "--------------START--------------",
         f"{req.method} {path} HTTP/1.1",
-        format_headers(req.headers),
+        format_headers(headers),
         body,
         "---------------END---------------",
     )

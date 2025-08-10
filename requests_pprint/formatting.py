@@ -13,6 +13,7 @@ from requests.structures import CaseInsensitiveDict
 
 def is_binary_content(content_type: str) -> bool:
     """Returns True if the content type indicates binary data."""
+    content_type = content_type.lower()
     binary_types: list[str] = [
         "application/pdf",
         "application/octet-stream",
