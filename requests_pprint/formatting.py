@@ -4,7 +4,8 @@ import json
 from typing import Any
 from xml.dom.minidom import Document, parseString
 
-from aiohttp import ClientRequest, ClientResponse, ContentTypeError
+from aiohttp import (ClientConnectionError, ClientRequest, ClientResponse,
+                     ContentTypeError)
 from multidict import CIMultiDict, CIMultiDictProxy
 from requests import PreparedRequest, Response
 from requests.structures import CaseInsensitiveDict
@@ -189,7 +190,10 @@ async def async_parse_response_body(response: ClientResponse) -> str | bytes:
         str | bytes: The parsed body of the response.
     """
     content_type: str = response.headers.get("Content-Type", "").lower()
-    content: bytes = await response.read()
+    try:
+        content: bytes = await response.read()
+    except ClientConnectionError:
+        return ""
     content_encoding: str = response.get_encoding()
     try:
         content_text: str = await response.text()
