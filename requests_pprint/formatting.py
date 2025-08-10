@@ -83,11 +83,8 @@ def parse_content(
     Returns:
         str | bytes: The parsed content.
     """
-    # Binary or image content
-    if is_binary_content(content_type):
-        return "[BINARY DATA]"
     # Check for BOM and decode with UTF-8-SIG if present
-    elif content.startswith(b"\xef\xbb\xbf"):
+    if content.startswith(b"\xef\xbb\xbf"):
         return content.decode("utf-8-sig")
     # JSON handling
     elif "application/json" in content_type:
@@ -162,9 +159,13 @@ def parse_response_body(response: Response) -> str | bytes:
     Returns:
         str | bytes: The parsed body of the response.
     """
-    content_type: str = response.headers.get("Content-Type", "").lower()
-    content_encoding: str = response.apparent_encoding
+    content_type: str = response.headers.get("Content-Type", "")
+    if is_binary_content(content_type):
+        return "[BINARY DATA]"
+
     content: bytes = response.content
+    content_encoding: str = response.apparent_encoding
+
     try:
         content_text: str = response.text
     except UnicodeDecodeError:
@@ -190,17 +191,21 @@ async def async_parse_response_body(response: ClientResponse) -> str | bytes:
         str | bytes: The parsed body of the response.
     """
     content_type: str = response.headers.get("Content-Type", "").lower()
+    if is_binary_content(content_type):
+        return "[BINARY DATA]"
+    
     try:
         content: bytes = await response.read()
     except ClientConnectionError:
         return ""
     content_encoding: str = response.get_encoding()
+
     try:
-        content_text: str = await response.text()
+        content_text: str = content.decode(content_encoding)
     except UnicodeDecodeError:
         content_text = ""
     try:
-        content_json: dict[str, Any] = await response.json()
+        content_json: dict[str, Any] = json.loads(content_text)
     except (json.JSONDecodeError, ContentTypeError):
         content_json = {}
 
