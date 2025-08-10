@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from aiohttp import ClientRequest, ClientResponse, RequestInfo
 
 from requests_pprint.formatting import (async_parse_request_body,

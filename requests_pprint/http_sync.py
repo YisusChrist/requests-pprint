@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from requests.models import PreparedRequest, Response
 
 from requests_pprint.formatting import (format_headers, format_http_message,
