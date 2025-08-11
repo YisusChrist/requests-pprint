@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from requests.models import PreparedRequest, Response
+from requests.structures import CaseInsensitiveDict
 
 from requests_pprint.formatting import (format_headers, format_http_message,
                                         parse_request_body,
@@ -12,7 +13,7 @@ except ImportError:
     from builtins import print
 
 
-def pprint_http_request(req: PreparedRequest | None) -> None:
+def pprint_http_request(req: PreparedRequest) -> None:
     """
     At this point it is completely built and ready
     to be fired; it is "prepared".
@@ -26,10 +27,10 @@ def pprint_http_request(req: PreparedRequest | None) -> None:
     Args:
         req (requests.models.PreparedRequest): The request to print.
     """
-    if req is None:
+    if req is None:  # type: ignore[unreachable]
         return
-    
-    headers = req.headers.copy()
+
+    headers: CaseInsensitiveDict[str] = req.headers.copy()
     if "Host" not in headers and req.url:
         headers["Host"] = req.url.split("/")[2]
 
