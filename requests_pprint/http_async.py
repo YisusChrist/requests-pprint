@@ -1,10 +1,16 @@
 from __future__ import annotations
 
-from aiohttp import ClientRequest, ClientResponse, RequestInfo
+from typing import TYPE_CHECKING
+
+from aiohttp import RequestInfo
 
 from requests_pprint.formatting import (async_parse_response_body,
                                         format_headers, format_http_message,
                                         parse_request_body)
+
+if TYPE_CHECKING:
+    from aiohttp import ClientRequest, ClientResponse
+    from multidict import CIMultiDict
 
 try:
     from rich import print  # pylint: disable=redefined-builtin
@@ -19,7 +25,7 @@ async def pprint_async_http_request(req: ClientRequest | RequestInfo) -> None:
     Args:
         req (aiohttp.ClientRequest): The request to print.
     """
-    headers = req.headers.copy()
+    headers: CIMultiDict[str] = req.headers.copy()
     if "Host" not in headers and req.url:
         headers["Host"] = req.url.host  # type: ignore
 

@@ -1,11 +1,14 @@
 from __future__ import annotations
 
-from requests.models import PreparedRequest, Response
-from requests.structures import CaseInsensitiveDict
+from typing import TYPE_CHECKING
 
 from requests_pprint.formatting import (format_headers, format_http_message,
                                         parse_request_body,
                                         parse_response_body)
+
+if TYPE_CHECKING:
+    from requests.models import PreparedRequest, Response
+    from requests.structures import CaseInsensitiveDict
 
 try:
     from rich import print  # pylint: disable=redefined-builtin

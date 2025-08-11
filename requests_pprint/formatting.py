@@ -1,14 +1,19 @@
 from __future__ import annotations
 
 import json
-from typing import Any
-from xml.dom.minidom import Document, parseString
+from typing import TYPE_CHECKING
+from xml.dom.minidom import parseString
 
-from aiohttp import (ClientConnectionError, ClientRequest, ClientResponse,
-                     ContentTypeError)
-from multidict import CIMultiDict, CIMultiDictProxy
-from requests import PreparedRequest, Response
-from requests.structures import CaseInsensitiveDict
+from aiohttp import ClientConnectionError, ContentTypeError
+
+if TYPE_CHECKING:
+    from typing import Any
+    from xml.dom.minidom import Document
+
+    from aiohttp import ClientRequest, ClientResponse
+    from multidict import CIMultiDict, CIMultiDictProxy
+    from requests import PreparedRequest, Response
+    from requests.structures import CaseInsensitiveDict
 
 
 def is_binary_content(content_type: str) -> bool:
