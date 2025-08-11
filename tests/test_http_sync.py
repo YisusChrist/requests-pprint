@@ -6,7 +6,7 @@ from requests_pprint import (pprint_http_request, pprint_http_response,
                              print_response_summary)
 
 
-def test_pretty_print_http_request(
+def test_pprint_http_request(
     sample_request: PreparedRequest, capsys: pytest.CaptureFixture[str]
 ) -> None:
     pprint_http_request(sample_request)
@@ -20,7 +20,7 @@ def test_pretty_print_http_request(
     assert "---------------END---------------" in captured.out
 
 
-def test_pretty_print_http_response(
+def test_pprint_http_response(
     sample_response: Response, capsys: pytest.CaptureFixture[str]
 ) -> None:
     pprint_http_response(sample_response)
