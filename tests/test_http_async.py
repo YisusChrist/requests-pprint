@@ -1,6 +1,6 @@
 import pytest
 from _pytest.capture import CaptureResult
-from aiohttp import ClientRequest, ClientResponse, ClientSession
+from aiohttp import ClientRequest, ClientResponse
 
 from requests_pprint import (pprint_async_http_request,
                              pprint_async_http_response,
@@ -9,9 +9,9 @@ from requests_pprint import (pprint_async_http_request,
 
 @pytest.mark.asyncio
 async def test_pprint_async_http_request(
-    async_sample_request: ClientRequest, capsys: pytest.CaptureFixture[str]
+    async_request: ClientRequest, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    await pprint_async_http_request(async_sample_request)
+    await pprint_async_http_request(async_request)
     captured: CaptureResult[str] = capsys.readouterr()
 
     assert "--------------START--------------" in captured.out
@@ -23,9 +23,9 @@ async def test_pprint_async_http_request(
 
 @pytest.mark.asyncio
 async def test_pprint_async_http_response(
-    async_sample_response: ClientResponse, capsys: pytest.CaptureFixture[str]
+    async_response: ClientResponse, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    await pprint_async_http_response(async_sample_response)
+    await pprint_async_http_response(async_response)
     captured: CaptureResult[str] = capsys.readouterr()
 
     assert "--------------START--------------" in captured.out
@@ -37,9 +37,9 @@ async def test_pprint_async_http_response(
 
 @pytest.mark.asyncio
 async def test_print_async_response_summary_no_redirect(
-    async_sample_response: ClientResponse, capsys: pytest.CaptureFixture[str]
+    async_response: ClientResponse, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    await print_async_response_summary(async_sample_response)
+    await print_async_response_summary(async_response)
     captured: CaptureResult[str] = capsys.readouterr()
 
     assert "Request was not redirected" in captured.out
@@ -47,13 +47,9 @@ async def test_print_async_response_summary_no_redirect(
 
 @pytest.mark.asyncio
 async def test_print_async_response_summary_redirect(
-    aitohttp_client: ClientSession, capsys: pytest.CaptureFixture[str]
+    async_redirected_response: ClientResponse, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    # Simulate a redirected response
-    response: ClientResponse = await aitohttp_client.get(
-        "https://httpbin.org/redirect/1"
-    )
-    await print_async_response_summary(response)
+    await print_async_response_summary(async_redirected_response)
     captured: CaptureResult[str] = capsys.readouterr()
 
     assert "Request was redirected!" in captured.out

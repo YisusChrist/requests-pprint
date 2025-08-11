@@ -7,9 +7,9 @@ from requests_pprint import (pprint_http_request, pprint_http_response,
 
 
 def test_pprint_http_request(
-    sample_request: PreparedRequest, capsys: pytest.CaptureFixture[str]
+    sync_request: PreparedRequest, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    pprint_http_request(sample_request)
+    pprint_http_request(sync_request)
     captured: CaptureResult[str] = capsys.readouterr()
 
     assert "--------------START--------------" in captured.out
@@ -21,9 +21,9 @@ def test_pprint_http_request(
 
 
 def test_pprint_http_response(
-    sample_response: Response, capsys: pytest.CaptureFixture[str]
+    sync_response: Response, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    pprint_http_response(sample_response)
+    pprint_http_response(sync_response)
     captured: CaptureResult[str] = capsys.readouterr()
 
     assert "--------------START--------------" in captured.out
@@ -34,21 +34,21 @@ def test_pprint_http_response(
 
 
 def test_print_response_summary_no_redirect(
-    sample_response: Response, capsys: pytest.CaptureFixture[str]
+    sync_response: Response, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    sample_response.history = []  # Simulate no redirect
-    print_response_summary(sample_response)
+    sync_response.history = []  # Simulate no redirect
+    print_response_summary(sync_response)
     captured: CaptureResult[str] = capsys.readouterr()
 
     assert "Request was not redirected" in captured.out
 
 
 def test_print_response_summary_redirect(
-    sample_response: Response, capsys: pytest.CaptureFixture[str]
+    sync_response: Response, capsys: pytest.CaptureFixture[str]
 ) -> None:
     # Simulate a redirected response
-    sample_response.history = [sample_response]
-    print_response_summary(sample_response)
+    sync_response.history = [sync_response]
+    print_response_summary(sync_response)
     captured: CaptureResult[str] = capsys.readouterr()
 
     assert "Request was redirected!" in captured.out
