@@ -1,9 +1,43 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import pytest
-from _pytest.capture import CaptureResult
-from requests.models import PreparedRequest, Response
 
 from requests_pprint import (pprint_http_request, pprint_http_response,
                              print_response_summary)
+from tests._assert_helpers import *
+
+if TYPE_CHECKING:
+    from _pytest.capture import CaptureResult
+    from requests.models import PreparedRequest, Response
+
+
+def test_pprint_http_request_none(capsys: pytest.CaptureFixture[str]) -> None:
+    pprint_http_request(None)
+    captured: CaptureResult[str] = capsys.readouterr()
+    assert captured.out == ""
+
+
+def test_pprint_http_request_missing_host(
+    sync_request: PreparedRequest, capsys: pytest.CaptureFixture[str]
+) -> None:
+    sync_request.headers.pop("User-Agent", None)
+    sync_request.headers.pop("Host", None)
+    sync_request.url = "https://mytest.com/path"
+    pprint_http_request(sync_request)
+    captured: CaptureResult[str] = capsys.readouterr()
+    assert_missing_host_output(captured.out)
+
+
+def test_pprint_http_request_binary_body(
+    sync_request: PreparedRequest, capsys: pytest.CaptureFixture[str]
+) -> None:
+    sync_request.headers["Content-Type"] = "application/pdf"
+    sync_request.body = b"%PDF-1.4..."
+    pprint_http_request(sync_request)
+    captured: CaptureResult[str] = capsys.readouterr()
+    assert_binary_body_output(captured.out)
 
 
 def test_pprint_http_request(
@@ -11,13 +45,7 @@ def test_pprint_http_request(
 ) -> None:
     pprint_http_request(sync_request)
     captured: CaptureResult[str] = capsys.readouterr()
-
-    assert "--------------START--------------" in captured.out
-    assert "GET / HTTP/1.1" or "GET  HTTP/1.1" in captured.out
-    assert "User-Agent: Mozilla/5.0" in captured.out
-    assert "Host: example.com" in captured.out
-    assert '{"key": "value"}' in captured.out
-    assert "---------------END---------------" in captured.out
+    assert_full_request_output(captured.out)
 
 
 def test_pprint_http_response(
@@ -25,12 +53,7 @@ def test_pprint_http_response(
 ) -> None:
     pprint_http_response(sync_response)
     captured: CaptureResult[str] = capsys.readouterr()
-
-    assert "--------------START--------------" in captured.out
-    assert "HTTP/1.1 200 OK" in captured.out
-    assert "Content-Type: application/json" in captured.out
-    assert '"status": "success"' in captured.out
-    assert "---------------END---------------" in captured.out
+    assert_full_response_output(captured.out)
 
 
 def test_print_response_summary_no_redirect(
@@ -39,8 +62,7 @@ def test_print_response_summary_no_redirect(
     sync_response.history = []  # Simulate no redirect
     print_response_summary(sync_response)
     captured: CaptureResult[str] = capsys.readouterr()
-
-    assert "Request was not redirected" in captured.out
+    assert_no_redirect_output(captured.out)
 
 
 def test_print_response_summary_redirect(
@@ -50,9 +72,4 @@ def test_print_response_summary_redirect(
     sync_response.history = [sync_response]
     print_response_summary(sync_response)
     captured: CaptureResult[str] = capsys.readouterr()
-
-    assert "Request was redirected!" in captured.out
-    assert "------ ORIGINAL REQUEST ------" in captured.out
-    assert "------ ORIGINAL RESPONSE ------" in captured.out
-    assert "------ REDIRECTED REQUEST ------" in captured.out
-    assert "------ REDIRECTED RESPONSE ------" in captured.out
+    assert_redirect_output(captured.out)
