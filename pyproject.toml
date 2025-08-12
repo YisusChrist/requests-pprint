@@ -20,6 +20,7 @@ pylint = "^3.1.0"
 pytest = "^8.1.1"
 pytest-asyncio = ">=0.23.8"
 pytest-cov = "^6.2.1"
+nox-poetry = "^1.2.0"
 
 [tool.poetry.group.types.dependencies]
 types-requests = "^2.31.0.20240311"
