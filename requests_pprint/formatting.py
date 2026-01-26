@@ -22,6 +22,7 @@ def is_binary_content(content_type: str) -> bool:
     binary_types: list[str] = [
         "application/pdf",
         "application/octet-stream",
+        "application/vnd",
         "image/",
         "video/",
         "audio/",
