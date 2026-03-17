@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from email import message_from_bytes
 from typing import TYPE_CHECKING
 from xml.dom.minidom import parseString
 
@@ -118,6 +119,47 @@ def parse_content(
     return content_text or content.decode("utf-8", errors="replace")
 
 
+def parse_multipart_form_data(content_type: str, content: bytes) -> str:
+    # We concatenate headers + body for the parser to understand as a MIME message
+    headers_and_body = f"Content-Type: {content_type}\r\n\r\n".encode() + (
+        content if isinstance(content, bytes) else content.encode()
+    )
+    msg = message_from_bytes(headers_and_body)
+    boundary: str = content_type.split("boundary=")[-1]
+
+    parts: list[str] = []
+    for part in msg.walk():
+        # Skip multipart containers
+        if part.get_content_maintype() == "multipart":
+            continue
+
+        payload = part.get_payload(decode=True)
+        part_content_type: str = part.get_content_type()
+        filename: str | None = part.get_filename()
+        name: str = part.get_param("name", header="content-disposition")
+
+        # Verify if the content is binary and handle accordingly
+        if is_binary_content(part_content_type):
+            content_display: str = f"[BINARY DATA: {part_content_type}]"
+        else:
+            try:
+                content_display = payload.decode("utf-8", errors="replace")
+            except Exception:
+                content_display = "[UNDECODABLE DATA]"
+
+        info: str = f'--{boundary}\nContent-Disposition: form-data; name="{name}"'
+        if filename:
+            info += f'; filename="{filename}"'
+        info += "\n"
+        if part_content_type and part_content_type != "text/plain":
+            info += f"Content-Type: {part_content_type}\n"
+        info += f"\n{content_display}"
+
+        parts.append(info)
+
+    return "\n".join(parts) + f"\n--{boundary}--"
+
+
 def parse_request_body(request: PreparedRequest | ClientRequest) -> str:
     """
     Parse the body of an HTTP message.
@@ -129,11 +171,15 @@ def parse_request_body(request: PreparedRequest | ClientRequest) -> str:
         str: The parsed body as a string.
     """
     body = request.body
-    if is_binary_content(request.headers.get("Content-Type", "")):
-        return "[BINARY DATA]"
+    content_type: str = request.headers.get("Content-Type", "")
 
-    if isinstance(body, bytes):
+    if is_binary_content(content_type):
+        return "[BINARY DATA]"
+    elif "multipart/form-data" in content_type:
+        return parse_multipart_form_data(content_type, body)
+    elif isinstance(body, bytes):
         return body.decode()
+
     return str(body) or ""
 
 
